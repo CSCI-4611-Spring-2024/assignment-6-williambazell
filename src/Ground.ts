@@ -86,9 +86,31 @@ export class Ground extends gfx.Mesh3
         // 3. Loop through all of the vertices of the ground mesh, and adjust the height of each based on 
         // the equations in section 4.5 of the paper.  Note, the equations rely upon a function
         // h(), and we have implemented that for you as computeH() defined below.
+        const direction = gfx.Vector3.subtract(groundEndPoint, groundStartPoint);
+        const planeNorm = gfx.Vector3.cross(direction, new gfx.Vector3(0, 1, 0));
+        planeNorm.normalize();
+        const projectionPlane = new gfx.Plane3(groundStartPoint, planeNorm);
 
-        
+        const silCurve: gfx.Vector3[] = [];
 
+        stroke2D.path.forEach((point: gfx.Vector2) => {
+            const ray = new gfx.Ray3();
+            ray.setPickRay(point, camera);
+            const intersection = ray.intersectsPlane(projectionPlane);
+            if(intersection){
+                silCurve.push(intersection);
+            }
+        });
+
+        this.vertices.forEach((vertex) => {
+            const closestPoint = projectionPlane.project(vertex);
+            const h = this.computeH(closestPoint, silCurve, projectionPlane);
+            if(h != 0){
+                const d = projectionPlane.distanceTo(vertex);
+                const w = Math.max(0, 1 - Math.pow(d/5, 2));
+                vertex.y = (1 - w) * vertex.y + w * h;
+            }
+        });
 
         // After computing new values for the vertices, re-assign them to the mesh to push them onto
         // the graphics card and recompute new vertex normals.

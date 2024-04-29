@@ -7,11 +7,11 @@ You should fill out the following information before submission:
 
 1. **Third Party Assets**. List the name and source of any third party assets that you added, such as models, images, sounds, or any other content used that was not solely written by you. 
 
-   `TO BE COMPLETED`
+   I did not use any third party assets
 
 2. **Wizard Bonus Functionality**. If you completed the wizard bonus challenge, then please provide a brief description along with any instructions for the person grading your assignment.
 
-   `TO BE COMPLETED`
+   I did not do the wizard bonus challenge
 
 ## Important Note
 

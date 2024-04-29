@@ -190,17 +190,27 @@ export class Stroke2D extends gfx.Node3
      */
     public createSkyStrokeMesh(camera: gfx.Camera, skyRadius: number): gfx.Mesh3
     {
-        // TODO: Part 1: Draw Sky Strokes
+        
+        const vertices: gfx.Vector3[] = [];
+        const skySphere = new gfx.BoundingSphere();
+        skySphere.radius = skyRadius;
 
-        // Hint #1: The Ray class in GopherGfx has an intersectsSphere() routine that you can use to
-        // project the stroke2D onto a "sky sphere".
+        this.vertices.forEach((vertex: gfx.Vector2) => {
+            const ray = new gfx.Ray3();
+            ray.setPickRay(vertex, camera);
+            const intersection = ray.intersectsSphere(skySphere);
+            if(intersection){
+                vertices.push(intersection);
+            } 
+        });
 
-        // Hint #2: When creating a new Mesh3, you can setup its material to be the same color as the stroke2D with:
-        // newMesh.material = new gfx.UnlitMaterial();
-        // newMesh.material.setColor(stroke2D.color);
+        const mesh = new gfx.Mesh3();
+        mesh.material = new gfx.UnlitMaterial();
+        mesh.material.setColor(this.color);
+        mesh.setVertices(vertices);
+        mesh.setIndices(this.indices);
 
-
-        return new gfx.Mesh3();
+        return mesh;
     }
 
 
@@ -223,16 +233,28 @@ export class Stroke2D extends gfx.Node3
      */
     public createBillboard(camera: gfx.Camera, anchorPointWorld: gfx.Vector3): Billboard
     {
-        // TODO: Part 2: Draw Billboards Attached to the Ground
+        //Same as cameraPosition = camera.position;
+        const cameraPos = camera.localToWorldMatrix.transformPoint(new gfx.Vector3(0, 0, 0));
+        const normalVec = gfx.Vector3.subtract(cameraPos, anchorPointWorld);
+        normalVec.normalize();
+        const plane = new gfx.Plane3(anchorPointWorld, normalVec);
+        const vertices: gfx.Vector3[] = [];
 
-        // Hint #1: To get the position of the camera in world coordinates, you can use the camera's localToWorld matrix
-        // to transform the origin of camera space (0,0,0) to world space.
+        this.vertices.forEach((vertex: gfx.Vector2) => {
+            const ray = new gfx.Ray3();
+            ray.setPickRay(vertex, camera);
+            const intersection = ray.intersectsPlane(plane);
+            if(intersection){
+                vertices.push(intersection);
+            } 
+        });
 
-        // Hint #2: When creating a new Mesh3, you can setup it's material to be the same color as the stroke2D with:
-        // newMesh.material = new gfx.UnlitMaterial();
-        // newMesh.material.setColor(stroke2D.color);
+        const mesh = new gfx.Mesh3();
+        mesh.material = new gfx.UnlitMaterial();
+        mesh.material.setColor(this.color);
+        mesh.setVertices(vertices);
+        mesh.setIndices(this.indices);
 
-
-        return new Billboard(new gfx.Vector3(0,0,0), new gfx.Vector3(0,0,0), new gfx.Mesh3());
+        return new Billboard(anchorPointWorld, normalVec, mesh);
     }
 }
